@@ -290,5 +290,5 @@ MIT License – Free to use and modify.
 Use the `/info` command in the bot, or visit your web dashboard for insights and logs.
 
 ### 🔗 Contact: 
-[Ryan Alexis](https://www.facebook.com/rai.senpaix) • [@shxnlovesu](t.me/@shxnlovesu)
+[Ryan Alexis](https://www.facebook.com/rai.senpaix) • [@shxnlovesu](https://t.me/@shxnlovesu)
 
