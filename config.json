@@ -1,0 +1,40 @@
+{
+  "discord": {
+    "enabled": true,
+    "token": "DISCORD_BOT_TOKEN",
+    "prefix": "!",
+    "clientId": "CLIENT_ID"
+  },
+  "telegram": {
+    "enabled": true,
+    "token": "TELEGRAM_BOT_TOKEN"
+  },
+  "facebook": {
+    "enabled": false,
+    "pageAccessToken": "",
+    "verifyToken": "",
+    "appSecret": "",
+    "status": "coming_soon"
+  },
+  "web": {
+    "enabled": true,
+    "port": 5000
+  },
+  "features": {
+    "logging": true,
+    "debugMode": false
+  },
+  "admins": {
+    "discord": [
+      "DISCORD_ADMIN_ID"
+    ],
+    "telegram": [
+      "TELEGRAM_ADMIN_ID"
+    ]
+  },
+  "bot": {
+    "name": "ZENTRYX",
+    "version": "1.0.0",
+    "developer": "ShinDevv"
+  }
+}

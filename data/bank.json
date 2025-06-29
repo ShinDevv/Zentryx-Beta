@@ -1,0 +1,21 @@
+{
+  "users": {
+    "6332155141": {
+      "balance": 205,
+      "totalEarned": 255,
+      "gamesPlayed": 3,
+      "gamesWon": 1,
+      "lastDaily": "2025-06-29T02:19:56.534Z",
+      "streak": 1
+    },
+    "1325980046619574436": {
+      "balance": 350,
+      "totalEarned": 550,
+      "gamesPlayed": 2,
+      "gamesWon": 2,
+      "lastDaily": "2025-06-29T02:21:17.257Z",
+      "streak": 1
+    }
+  },
+  "lastUpdated": "2025-06-29T02:23:02.042Z"
+}

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENTRYX Bot Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'discord-dark': '#2f3136',
+                        'discord-darker': '#36393f',
+                        'discord-darkest': '#202225',
+                        'discord-accent': '#5865f2',
+                        'discord-green': '#3ba55c',
+                        'discord-red': '#ed4245',
+                        'discord-yellow': '#faa61a',
+                        'purple-glow': '#8b5cf6',
+                        'cyan-glow': '#06b6d4'
+                    },
+                    animation: {
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    },
+                    keyframes: {
+                        glow: {
+                            'from': { 'box-shadow': '0 0 20px rgba(139, 92, 246, 0.5)' },
+                            'to': { 'box-shadow': '0 0 30px rgba(139, 92, 246, 0.8)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(47, 49, 54, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .neon-border {
+            border: 2px solid transparent;
+            background: linear-gradient(45deg, #8b5cf6, #06b6d4) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+        .status-online {
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(59, 165, 92, 0.7);
+        }
+        .readme-content {
+            background: linear-gradient(135deg, rgba(47, 49, 54, 0.9), rgba(54, 57, 63, 0.9));
+        }
+        .readme-content h1, .readme-content h2, .readme-content h3 {
+            color: #8b5cf6;
+            margin: 1.5rem 0 1rem 0;
+            position: relative;
+        }
+        .readme-content h1:after, .readme-content h2:after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, #8b5cf6, #06b6d4);
+            border-radius: 2px;
+        }
+        .readme-content code {
+            background: rgba(32, 34, 37, 0.8);
+            color: #06b6d4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        .readme-content pre {
+            background: rgba(32, 34, 37, 0.9);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .readme-content pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        .readme-content blockquote {
+            border-left: 4px solid #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .readme-content ul, .readme-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        .readme-content li {
+            margin: 0.5rem 0;
+            color: #d1d5db;
+        }
+        .readme-content a {
+            color: #06b6d4;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .readme-content a:hover {
+            border-bottom-color: #06b6d4;
+            color: #67e8f9;
+        }
+        .log-line {
+            transition: all 0.3s ease;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+        .log-line:hover {
+            background: rgba(139, 92, 246, 0.1);
+        }
+        .error-state {
+            background: linear-gradient(135deg, rgba(237, 66, 69, 0.1), rgba(237, 66, 69, 0.05));
+            border: 1px solid rgba(237, 66, 69, 0.3);
+        }
+        .loading-spinner {
+            border: 3px solid rgba(139, 92, 246, 0.3);
+            border-top: 3px solid #8b5cf6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-discord-darkest min-h-screen text-gray-300 overflow-x-hidden">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-discord-darkest to-blue-900/20"></div>
+        <div class="absolute top-20 left-20 w-72 h-72 bg-purple-glow/10 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-20 right-20 w-96 h-96 bg-cyan-glow/10 rounded-full blur-3xl animate-float" style="animation-delay: 1s;"></div>
+    </div>
+
+    <div class="relative z-10 container mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <div class="glass-effect rounded-xl p-8 neon-border shadow-2xl animate-glow">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-glow to-cyan-glow rounded-full flex items-center justify-center mr-4 animate-pulse-slow">
+                        <i class="fas fa-robot text-2xl text-white"></i>
+                    </div>
+                    <h1 class="text-5xl font-bold bg-gradient-to-r from-purple-glow to-cyan-glow bg-clip-text text-transparent">
+                        ZENTRYX
+                    </h1>
+                </div>
+                <p class="text-gray-400 text-lg mb-4">Cross-Platform AI Chatbot</p>
+                <p class="text-sm text-gray-500">Developed by <span class="text-purple-glow font-semibold">ShinDevv</span></p>
+                <div class="mt-6 inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-discord-green/20 to-discord-green/10 text-discord-green text-sm border border-discord-green/30">
+                    <div class="w-3 h-3 bg-discord-green rounded-full mr-3 status-online"></div>
+                    System Online
+                </div>
+            </div>
+        </header>
+
+        <!-- Enhanced Navigation Tabs -->
+        <div class="flex justify-center mb-8">
+            <div class="glass-effect rounded-lg p-2 shadow-lg">
+                <button onclick="showTab('dashboard')" id="dashboardTab" class="tab-button active px-6 py-3 rounded-lg bg-gradient-to-r from-purple-glow to-cyan-glow text-white font-semibold transition-all duration-300 transform hover:scale-105">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                </button>
+                <button onclick="showTab('logs')" id="logsTab" class="tab-button px-6 py-3 rounded-lg text-gray-300 hover:text-white font-semibold transition-all duration-300 hover:bg-white/10">
+                    <i class="fas fa-terminal mr-2"></i>Console Logs
+                </button>
+                <button onclick="showTab('readme')" id="readmeTab" class="tab-button px-6 py-3 rounded-lg text-gray-300 hover:text-white font-semibold transition-all duration-300 hover:bg-white/10">
+                    <i class="fas fa-book mr-2"></i>Documentation
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboardContent" class="tab-content">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Uptime Card -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-discord-green">
+                            <div class="w-12 h-12 bg-discord-green/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="loading-spinner hidden" id="uptimeLoader"></div>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1" id="uptime">--</div>
+                    <div class="text-gray-400 text-sm">System Uptime</div>
+                </div>
+
+                <!-- Commands Card -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-discord-accent">
+                            <div class="w-12 h-12 bg-discord-accent/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-terminal text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="loading-spinner hidden" id="commandsLoader"></div>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1" id="commands">--</div>
+                    <div class="text-gray-400 text-sm">Commands Executed</div>
+                </div>
+
+                <!-- Ping Card -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-discord-yellow">
+                            <div class="w-12 h-12 bg-discord-yellow/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-wifi text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="loading-spinner hidden" id="pingLoader"></div>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1" id="ping">--</div>
+                    <div class="text-gray-400 text-sm">Response Time (ms)</div>
+                </div>
+
+                <!-- Available Commands Card -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-cyan-glow">
+                            <div class="w-12 h-12 bg-cyan-glow/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-code text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1" id="commandCount">--</div>
+                    <div class="text-gray-400 text-sm">Available Commands</div>
+                </div>
+            </div>
+
+            <!-- Platform Status -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Discord Status -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-16 h-16 bg-gradient-to-r from-discord-accent to-purple-glow rounded-xl flex items-center justify-center text-2xl shadow-lg">
+                               <i class="fab fa-discord"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-white mb-2">Discord</h3>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="w-3 h-3 rounded-full" id="discordStatus"></div>
+                                <span class="text-gray-300 font-medium" id="discordText">Loading...</span>
+                            </div>
+                            <div class="text-sm text-gray-400">
+                                <i class="fas fa-server mr-1"></i>
+                                <span id="discordGuilds">--</span> servers connected
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telegram Status -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-glow rounded-xl flex items-center justify-center text-2xl shadow-lg">
+                                <i class="fab fa-telegram-plane"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-white mb-2">Telegram</h3>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="w-3 h-3 rounded-full" id="telegramStatus"></div>
+                                <span class="text-gray-300 font-medium" id="telegramText">Loading...</span>
+                            </div>
+                            <div class="text-sm text-gray-400">
+                                <i class="fas fa-comments mr-1"></i>
+                                <span id="telegramChats">--</span> active chats
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facebook Status -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-400 rounded-xl flex items-center justify-center text-2xl shadow-lg opacity-60">
+                                <i class="fab fa-facebook-messenger"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-white mb-2">Facebook Messenger</h3>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <div class="w-3 h-3 rounded-full bg-discord-yellow animate-pulse"></div>
+                                <span class="text-gray-300 font-medium">Coming Soon</span>
+                            </div>
+                            <div class="text-sm text-gray-400">
+                                <i class="fas fa-wrench mr-1"></i>
+                                Integration in development
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="glass-effect rounded-xl p-6 shadow-xl mb-8">
+                <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-purple-glow"></i>
+                    Performance Metrics
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-cyan-glow mb-1" id="cacheSize">--</div>
+                        <div class="text-gray-400 text-sm">Cache Entries</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-glow mb-1" id="commandsPerMinute">--</div>
+                        <div class="text-gray-400 text-sm">Commands/Minute</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-discord-yellow mb-1" id="averageResponseTime">--</div>
+                        <div class="text-gray-400 text-sm">Avg Response (ms)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Console Logs Tab -->
+        <div id="logsContent" class="tab-content hidden">
+            <div class="glass-effect rounded-xl shadow-2xl">
+                <div class="p-6 border-b border-gray-700/50">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-semibold text-white flex items-center">
+                            <i class="fas fa-terminal mr-3 text-discord-green"></i>
+                            Real-time Console Logs
+                        </h2>
+                        <div class="flex space-x-3">
+                            <button onclick="toggleAutoScroll()" id="autoScrollBtn" class="px-4 py-2 bg-gradient-to-r from-purple-glow to-cyan-glow text-white rounded-lg text-sm font-medium transition-all duration-300 hover:shadow-lg">
+                                <i class="fas fa-sync-alt mr-1"></i>Auto-scroll: ON
+                            </button>
+                            <button onclick="clearLogs()" class="px-4 py-2 bg-discord-red hover:bg-discord-red/80 text-white rounded-lg text-sm font-medium transition-all duration-300 hover:shadow-lg">
+                                <i class="fas fa-trash mr-1"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div id="logsContainer" class="bg-gradient-to-br from-gray-900 to-black rounded-lg p-4 font-mono text-sm h-96 overflow-y-auto border border-gray-700/50">
+                        <div id="logsList" class="space-y-1">
+                            <div class="flex items-center text-yellow-400">
+                                <div class="loading-spinner mr-2"></div>
+                                <i class="fas fa-download mr-2"></i>Loading console logs...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- README Tab -->
+        <div id="readmeContent" class="tab-content hidden">
+            <div class="glass-effect rounded-xl shadow-2xl">
+                <div class="p-6 border-b border-gray-700/50">
+                    <h2 class="text-2xl font-semibold text-white flex items-center">
+                        <i class="fas fa-book mr-3 text-discord-accent"></i>
+                        Project Documentation
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div id="readmeMarkdown" class="readme-content prose prose-invert max-w-none text-gray-300 leading-relaxed">
+                        <div class="flex items-center justify-center py-12">
+                            <div class="text-center">
+                                <div class="loading-spinner mx-auto mb-4"></div>
+                                <p class="text-gray-400">Loading documentation...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Refresh Button -->
+        <div class="text-center mt-12">
+            <button 
+                onclick="refreshData()" 
+                id="refreshBtn"
+                class="bg-gradient-to-r from-purple-glow to-cyan-glow hover:from-purple-glow/80 hover:to-cyan-glow/80 text-white font-semibold py-4 px-8 rounded-xl shadow-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-purple-500/25"
+            >
+                <i class="fas fa-sync-alt mr-2" id="refreshIcon"></i>
+                Refresh Dashboard
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let autoScroll = true;
+        let currentTab = 'dashboard';
+        let refreshing = false;
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.className = btn.className.replace('bg-gradient-to-r from-purple-glow to-cyan-glow text-white', 'text-gray-300 hover:text-white hover:bg-white/10');
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + 'Content').classList.remove('hidden');
+
+            // Add active class to selected tab button
+            const activeBtn = document.getElementById(tabName + 'Tab');
+            activeBtn.className = activeBtn.className.replace('text-gray-300 hover:text-white hover:bg-white/10', 'bg-gradient-to-r from-purple-glow to-cyan-glow text-white');
+            activeBtn.classList.add('active');
+
+            currentTab = tabName;
+
+            // Load data for specific tabs
+            if (tabName === 'logs') {
+                fetchLogs();
+            } else if (tabName === 'readme') {
+                fetchReadme();
+            }
+        }
+
+        async function fetchStats() {
+            try {
+                showLoader('uptimeLoader');
+                showLoader('commandsLoader');
+
+                const response = await fetch('/api/stats');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const stats = await response.json();
+
+                document.getElementById('uptime').textContent = stats.uptimeFormatted || 'Unknown';
+                document.getElementById('commands').textContent = stats.commandsExecuted || 0;
+                document.getElementById('commandCount').textContent = stats.commandCount || 0;
+                document.getElementById('discordGuilds').textContent = stats.discordGuilds || 0;
+                document.getElementById('telegramChats').textContent = stats.telegramChats || 0;
+                document.getElementById('cacheSize').textContent = stats.cacheSize || 0;
+                document.getElementById('commandsPerMinute').textContent = stats.commandsPerMinute || 0;
+                document.getElementById('averageResponseTime').textContent = stats.averageResponseTime || 0;
+
+                updatePlatformStatus('discord', stats.platforms?.discord);
+                updatePlatformStatus('telegram', stats.platforms?.telegram);
+
+                hideLoader('uptimeLoader');
+                hideLoader('commandsLoader');
+
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+                handleStatsError();
+            }
+        }
+
+        function updatePlatformStatus(platform, isOnline) {
+            const statusElement = document.getElementById(platform + 'Status');
+            const textElement = document.getElementById(platform + 'Text');
+
+            if (isOnline) {
+                statusElement.className = 'w-3 h-3 rounded-full bg-discord-green status-online';
+                textElement.textContent = 'Online';
+                textElement.className = 'text-discord-green font-medium';
+            } else {
+                statusElement.className = 'w-3 h-3 rounded-full bg-discord-red';
+                textElement.textContent = 'Offline';
+                textElement.className = 'text-discord-red font-medium';
+            }
+        }
+
+        function handleStatsError() {
+            const errorElements = ['uptime', 'commands', 'commandCount', 'cacheSize', 'commandsPerMinute', 'averageResponseTime'];
+            errorElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = 'Error';
+                    element.parentElement.classList.add('error-state');
+                }
+            });
+
+            hideLoader('uptimeLoader');
+            hideLoader('commandsLoader');
+        }
+
+        async function fetchPing() {
+            try {
+                showLoader('pingLoader');
+                const start = Date.now();
+                const response = await fetch('/api/ping');
+                const ping = Date.now() - start;
+
+                document.getElementById('ping').textContent = ping;
+                hideLoader('pingLoader');
+            } catch (error) {
+                document.getElementById('ping').textContent = 'Error';
+                document.getElementById('ping').parentElement.classList.add('error-state');
+                hideLoader('pingLoader');
+            }
+        }
+
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/api/logs');
+                const data = await response.json();
+                const logsContainer = document.getElementById('logsList');
+
+                if (data.logs && data.logs.length > 0) {
+                    logsContainer.innerHTML = data.logs.map(log => 
+                        `<div class="log-line text-green-400"><i class="fas fa-terminal mr-2 text-xs"></i>${escapeHtml(log)}</div>`
+                    ).join('');
+                } else {
+                    logsContainer.innerHTML = '<div class="text-yellow-400 text-center py-8"><i class="fas fa-info-circle mr-2"></i>No logs available. Console output will appear here when generated.</div>';
+                }
+
+                if (autoScroll) {
+                    const container = document.getElementById('logsContainer');
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (error) {
+                document.getElementById('logsList').innerHTML = '<div class="text-red-400 text-center py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Error loading logs</div>';
+            }
+        }
+
+        async function fetchReadme() {
+            try {
+                const response = await fetch('/api/readme');
+                const data = await response.json();
+
+                if (data.content) {
+                    const markdownHtml = marked.parse(data.content);
+                    document.getElementById('readmeMarkdown').innerHTML = markdownHtml;
+                } else {
+                    document.getElementById('readmeMarkdown').innerHTML = '<div class="text-red-400 text-center py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Error loading README.md</div>';
+                }
+            } catch (error) {
+                document.getElementById('readmeMarkdown').innerHTML = '<div class="text-red-400 text-center py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Error loading documentation</div>';
+            }
+        }
+
+        function toggleAutoScroll() {
+            autoScroll = !autoScroll;
+            const btn = document.getElementById('autoScrollBtn');
+            btn.innerHTML = `<i class="fas fa-${autoScroll ? 'sync-alt' : 'pause'} mr-1"></i>Auto-scroll: ${autoScroll ? 'ON' : 'OFF'}`;
+            btn.className = autoScroll ? 
+                'px-4 py-2 bg-gradient-to-r from-purple-glow to-cyan-glow text-white rounded-lg text-sm font-medium transition-all duration-300 hover:shadow-lg' : 
+                'px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium transition-all duration-300 hover:shadow-lg';
+        }
+
+        function clearLogs() {
+            document.getElementById('logsList').innerHTML = '<div class="text-yellow-400 text-center py-8"><i class="fas fa-check-circle mr-2"></i>Logs cleared. New output will appear here.</div>';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showLoader(id) {
+            const loader = document.getElementById(id);
+            if (loader) loader.classList.remove('hidden');
+        }
+
+        function hideLoader(id) {
+            const loader = document.getElementById(id);
+            if (loader) loader.classList.add('hidden');
+        }
+
+        function refreshData() {
+            if (refreshing) return;
+
+            refreshing = true;
+            const refreshBtn = document.getElementById('refreshBtn');
+            const refreshIcon = document.getElementById('refreshIcon');
+
+            refreshBtn.disabled = true;
+            refreshIcon.classList.add('animate-spin');
+
+            Promise.all([
+                fetchStats(),
+                fetchPing(),
+                currentTab === 'logs' ? fetchLogs() : Promise.resolve(),
+                currentTab === 'readme' ? fetchReadme() : Promise.resolve()
+            ]).finally(() => {
+                setTimeout(() => {
+                    refreshing = false;
+                    refreshBtn.disabled = false;
+                    refreshIcon.classList.remove('animate-spin');
+                }, 1000);
+            });
+        }
+
+        // Initialize
+        refreshData();
+
+        // Auto refresh every 5 seconds for dashboard, every 3 seconds for logs
+        setInterval(() => {
+            if (!refreshing) {
+                if (currentTab === 'dashboard') {
+                    fetchStats();
+                    fetchPing();
+                } else if (currentTab === 'logs') {
+                    fetchLogs();
+                }
+            }
+        }, currentTab === 'logs' ? 3000 : 5000);
+    </script>
+</body>
+</html>
